@@ -1,6 +1,6 @@
-// import axios from 'axios';
-// import React, { useState } from 'react'
 import './booktable.css';
+import {useState} from 'react';
+import axios from "axios";
 
 const BookTable = () => {
   
@@ -11,24 +11,43 @@ const BookTable = () => {
     date += 1;
     if (date > 31) {
         month += 1;
+        date = date % 31;
     }
     let d2 = date + '/' + (month + 1);
     date = date % 31 + 1;
-    month += 1;
     let d3 = date + '/' + (month + 1);
 
-    // const handleChange = (event) => {
-    //     const name = event.target.name;
-    //     const value = event.target.value;
-    //     setInputs(values => ({values, [name]: value}))
-    // }
-    // const [inputs, setInputs] = useState({})
-    // const handleSubmit = (event) => {
-    //     event.preventDefault();
-
-    //     axios.post('http://localhost:3307/api/users/save', inputs)
-    //     console.log(inputs);
-    // }
+    const [inputs, setInputs] = useState([]);
+    const handleChange = (event) => {
+        const name = event.target.name;
+        const value = event.target.value;
+        setInputs(values => ({...values, [name]: value}));
+    }
+    const handleSubmit = (event) => {
+        console.log(inputs);
+        event.preventDefault();
+        let formData = new FormData();
+        formData.append("days", inputs.days);
+        formData.append("hours", inputs.hours);
+        formData.append("name", inputs.name);
+        formData.append("phone", inputs.phone);
+        formData.append("num", inputs.num);
+        axios({
+            method: 'post',
+            url: 'http://localhost/src/container/BookTable/booktable.php',
+            data: formData,
+            config: { headers: {'Content-Type': 'multipart/form-data' }}
+        })
+        .then(function (response) {
+            //handle success
+            console.log(response)
+            alert('New Contact Successfully Added.');  
+        })
+        .catch(function (response) {
+            //handle error
+            console.log(response)
+        });
+    }
 
   return (
     <>
@@ -40,16 +59,16 @@ const BookTable = () => {
 
             <div className="card-content">
                 <h4>Please select your booking details</h4>
-                <form name="myForm">
+                <form onSubmit={handleSubmit}>
                     <div className="form-row">
-                        <select name="days" required>
+                        <select name="days"  onChange={handleChange} required>
                             <option value="">Select Day</option>
                             <option id="date1">{d1}</option>
                             <option id="date2">{d2}</option>
                             <option id="date3">{d3}</option>
                         </select>
 
-                        <select name="hours" required>
+                        <select name="hours"  onChange={handleChange} required>
                             <option value="">Select Hour</option>
                             <option value="10">10: 00</option>
                             <option value="12">12: 00</option>
@@ -62,12 +81,12 @@ const BookTable = () => {
                     </div>
 
                     <div className="form-row">
-                        <input type="text" placeholder="Full Name" name="name" required></input>
-                        <input type="number" placeholder="Phone Number" name="phone" required></input>
+                        <input type="text" placeholder="Full Name" name="name"  onChange={handleChange} required></input>
+                        <input type="number" placeholder="Phone Number" name="phone" onChange={handleChange} required></input>
                     </div>
 
                     <div className="form-row">
-                        <input type="number" placeholder="How Many Persons?" min="1" name="num"></input>
+                        <input type="number" placeholder="How Many Persons?" min="1" name="num"  onChange={handleChange} required></input>
                         <input type="submit" value="BOOK TABLE"></input>
                     </div>
                 </form>
